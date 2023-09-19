@@ -1,0 +1,66 @@
+---
+# Playbook to validate the Chrome installation
+# Here we are checking the Chrome installation and printing the version
+# If Chrome is not installed we are installing Chrome by copying the Chrome exe
+# from ansible control machine to inventory machines and installing
+# If chrome exe is not available in the /tmp directory playbook will fail
+# We can replace the destination path by using a variable chrome_dst
+# Playbook will fail if not able to download the exe file with an error message
+
+- name: Verify Google Chrome installation
+  hosts: all
+  gather_facts: true
+  vars:
+    chrome_src: /tmp/chrome_installer.exe
+    chrome_dst: C:\Temp\chrome_installer.exe
+  tasks:
+    - name: Check if Google Chrome is already installed
+      win_shell: |
+        $chromeVersion = (wmic datafile where 'name="C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"' get version /value).Split("=")[1].Trim()
+        Write-Output $chromeVersion
+      ignore_errors: true
+      register: chrome_installed
+
+    - name: Print installed Google Chrome version
+      debug:
+        msg: "Google Chrome is already installed with version {{ chrome_installed.stdout }} on {{ inventory_hostname }}"
+      when:
+        - chrome_installed.rc == 0
+
+    - name: Print hosts if not installed Google Chrome
+      debug:
+        msg: "Google Chrome is not installed on {{ inventory_hostname }}"
+      when:
+        - chrome_installed.rc != 0
+
+    - name: Check chrome exe is exists
+      stat:
+        path: "{{ chrome_src }}"
+      register: chrome_exists
+      delegate_to: localhost
+
+    - name: Print chrome if not exists
+      fail:
+        debug: "Chrome exe is not available to copy"
+      when: not chrome_exists.stat.exists
+
+    - name: copy Google Chrome exe
+      win_copy:
+        src: "{{ chrome_src}}"
+        dest: "{{ chrome_dst }}"
+      register: cp_result
+      when:
+        - chrome_installed.rc != 0
+        - chrome_exists.stat.exists
+      
+    - name: Install Google Chrome
+      win_command: 'C:\Temp\chrome_installer.exe /silent /install'
+      register: install_status
+      when:
+        - chrome_installed.rc != 0
+        
+    - name: Print hosts if downloaded and installed Google Chrome
+      debug:
+        msg: "Google Chrome downloaded and installed on {{ inventory_hostname }}"
+      when:
+        - chrome_installed.rc != 0
