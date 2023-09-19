@@ -1,0 +1,25 @@
+TASK [Print installed Google Chrome version] ****************************************************************************************ok: [server1] => {
+    "msg": "Google Chrome is already installed with version \r\n on server1"
+}
+ok: [server2] => {
+    "msg": "Google Chrome is already installed with version \r\n on server2"
+}
+ok: [server3] => {
+    "msg": "Google Chrome is already installed with version \r\n on server3"
+}
+ok: [server4] => {
+    "msg": "Google Chrome is already installed with version \r\n on server4"
+}
+ok: [server5] => {
+    "msg": "Google Chrome is already installed with version \r\n on server5"
+}
+ok: [server6] => {
+    "msg": "Google Chrome is already installed with version \r\n on server6"
+}
+
+TASK [Print hosts if not installed Google Chrome] ***********************************************************************************skipping: [server1]
+skipping: [server1]
+skipping: [server2]
+skipping: [server3]
+skipping: [server4]
+skipping: [server5]
